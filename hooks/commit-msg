@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+	echo "Missing commit message"
+	exit 1
+fi
+lineNumber=0
+while read -r line; do
+	if [[ $lineNumber == 0 ]]; then
+		length="${#line}"
+		if [[ length -gt 50 ]]; then
+			echo "First line is longer than 50 characters"
+			exit 1
+		fi
+		firstchar=${line:0:1}
+		if [[ ! ($firstchar == [A-Z]) ]]; then
+			echo "First line does not start with a capital letter"
+			exit 1
+		fi
+	elif [[ $lineNumber == 1 ]]; then
+		if [[ ! (-z $line) ]]; then
+			echo "Second line should be a blank line"
+			exit 1
+		fi
+	fi
+	if [[ $lineNumber -gt 0 ]]; then
+		length="${#line}"
+		if [[ length -gt 72 ]]; then
+			echo "Body text is longer than 72 characters"
+			exit 1
+		fi
+	fi
+	lineNumber=$((lineNumber+1))
+done <"$1"
+
+exit 0
