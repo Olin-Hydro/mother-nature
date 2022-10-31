@@ -3,19 +3,30 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	mn "olinhydro/mothernature/internal"
 )
 
 type CommandType int
 
 const (
 	Sensor CommandType = iota
-	Switch
+	ScheduledActuator
+	ReactiveActuator
 )
 
 type Command struct {
 	CmdType CommandType `json:"cmdType"`
-	Id      int         `json:"id"`
+	Id      string      `json:"id"`
 	Cmd     int         `json:"cmd"`
+}
+
+type Schedule struct {
+	Cmds []ScheduledCommand `json:"commands"`
+}
+
+type ScheduledCommand struct {
+	Cmd      Command `json:"cmd"`
+	Datetime int64   `json:"datetime"`
 }
 
 func encodeCmd(cmd Command) (b []byte, e error) {
@@ -35,9 +46,13 @@ func decodeCmd(b []byte) (cmd Command, e error) {
 }
 
 func main() {
+	_, err := mn.NewHydrangea(mn.HYDRANGEA_GARDEN_URL, mn.HYDRANGEA_RALOG_URL, mn.HYDRANGEA_SENSORLOG_URL)
+	if err != nil {
+		fmt.Println(err)
+	}
 	senseCmd := Command{
 		CmdType: Sensor,
-		Id:      0,
+		Id:      "sdhb3k3j3kn",
 	}
 	fmt.Println(senseCmd)
 	b, err := encodeCmd(senseCmd)

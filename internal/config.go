@@ -1,0 +1,7 @@
+package internal
+
+import "os"
+
+var HYDRANGEA_GARDEN_URL = os.Getenv("HYDRANGEA_GARDEN_URL")
+var HYDRANGEA_RALOG_URL = os.Getenv("HYDRANGEA_RALOG_URL")
+var HYDRANGEA_SENSORLOG_URL = os.Getenv("HYDRANGEA_SENSORLOG_URL")
