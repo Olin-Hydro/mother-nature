@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	mn "olinhydro/mothernature/internal"
+
+	"github.com/Olin-Hydro/mother-nature/pkg"
 )
 
 type CommandType int
@@ -45,11 +46,35 @@ func decodeCmd(b []byte) (cmd Command, e error) {
 	return cmd, nil
 }
 
+func getGardenConfig(store pkg.Storage, gardenId string) (pkg.GardenConfig, error) {
+	garden, err := store.GetGarden(gardenId)
+	if err != nil {
+		return garden.Config, fmt.Errorf("#getConfig: %e", err)
+	}
+	return garden.Config, nil
+}
+
 func main() {
-	_, err := mn.NewHydrangea(mn.HYDRANGEA_GARDEN_URL, mn.HYDRANGEA_RALOG_URL, mn.HYDRANGEA_SENSORLOG_URL)
+	conf := pkg.LoadConfigFromEnv()
+	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaSensorLogURL)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
+	gardenConfig, err := getGardenConfig(h, conf.GardenId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(gardenConfig)
+	// TODO:
+	// Create schedule from config
+	// Send config to gardener
+	// TODO:
+	// Check conditions
+	// Send commands to gardener if needed
+
+	// Placeholder command code
 	senseCmd := Command{
 		CmdType: Sensor,
 		Id:      "sdhb3k3j3kn",

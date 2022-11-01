@@ -1,4 +1,4 @@
-package internal
+package pkg
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ type GardenConfig struct {
 	Name               string         `json:"name"`
 	Sensors            []SensorConfig `json:"sensors"`
 	ScheduledActuators []SAConfig     `json:"scheduled_actuators"`
-	ReactiveActuator   []RAConfig     `json:"reactive_actuators"`
+	ReactiveActuators  []RAConfig     `json:"reactive_actuators"`
 	CreatedAt          string         `json:"created_at"`
 }
 
