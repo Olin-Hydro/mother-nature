@@ -30,6 +30,7 @@ type ScheduledCommand struct {
 	Datetime int64   `json:"datetime"`
 }
 
+//nolint:unused
 func encodeCmd(cmd Command) (b []byte, e error) {
 	b, err := json.Marshal(cmd)
 	if err != nil {
@@ -38,6 +39,7 @@ func encodeCmd(cmd Command) (b []byte, e error) {
 	return b, nil
 }
 
+//nolint:unused
 func decodeCmd(b []byte) (cmd Command, e error) {
 	err := json.Unmarshal(b, &cmd)
 	if err != nil {
@@ -63,6 +65,7 @@ func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) 
 	return garden.Config, nil
 }
 
+//nolint:unused
 func main() {
 	conf := pkg.LoadConfigFromEnv()
 	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaSensorLogURL)

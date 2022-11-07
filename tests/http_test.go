@@ -12,6 +12,7 @@ import (
 
 func TestDecodeJson(t *testing.T) {
 	b, err := json.Marshal(mockGarden())
+	assert.NoError(t, err)
 	garden := pkg.Garden{}
 	r := ioutil.NopCloser(bytes.NewReader(b))
 	err = pkg.DecodeJson(&garden, r)
