@@ -1,4 +1,4 @@
-package main
+package mn
 
 import (
 	"encoding/json"
@@ -46,8 +46,17 @@ func decodeCmd(b []byte) (cmd Command, e error) {
 	return cmd, nil
 }
 
-func getGardenConfig(store pkg.Storage, gardenId string) (pkg.GardenConfig, error) {
-	garden, err := store.GetGarden(gardenId)
+func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) (pkg.GardenConfig, error) {
+	garden := pkg.Garden{}
+	req, err := store.CreateGardenReq(gardenId)
+	if err != nil {
+		return garden.Config, fmt.Errorf("#getConfig: %e", err)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return garden.Config, fmt.Errorf("#getConfig: %e", err)
+	}
+	err = pkg.DecodeJson(&garden, res.Body)
 	if err != nil {
 		return garden.Config, fmt.Errorf("#getConfig: %e", err)
 	}
@@ -61,7 +70,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	gardenConfig, err := getGardenConfig(h, conf.GardenId)
+	client := pkg.Client
+	gardenConfig, err := GetGardenConfig(h, client, conf.GardenId)
 	if err != nil {
 		fmt.Println(err)
 		return

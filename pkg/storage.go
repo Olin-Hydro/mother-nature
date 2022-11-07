@@ -1,10 +1,11 @@
 package pkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
+	"strings"
 )
 
 type Garden struct {
@@ -68,9 +69,9 @@ type SensorLog struct {
 }
 
 type Storage interface {
-	GetGarden(gardenId string) (Garden, error)
-	GetRALogs(RAId string, limit string) (RALogs, error)
-	GetSensorLogs(SensorId string, limit string) (SensorLogs, error)
+	CreateGardenReq(gardenId string) (*http.Request, error)
+	CreateRALogsReq(RAId string, limit string) (*http.Request, error)
+	CreateSensorLogsReq(SensorId string, limit string) (*http.Request, error)
 }
 
 type Hydrangea struct {
@@ -99,52 +100,35 @@ func NewHydrangea(gardenURL string, raLogURL string, sensorLogURL string) (Hydra
 	return h, nil
 }
 
-func (h Hydrangea) GetGarden(gardenId string) (Garden, error) {
-	garden := Garden{}
-	values := h.GardenURL.Query()
-	values.Add("id", gardenId)
-	h.GardenURL.RawQuery = values.Encode()
-	res, err := http.Get(h.GardenURL.String())
+func (h Hydrangea) CreateGardenReq(gardenId string) (*http.Request, error) {
+	h.GardenURL.Path = path.Join(h.GardenURL.Path, gardenId)
+	req, err := http.NewRequest("GET", h.GardenURL.String(), strings.NewReader(""))
 	if err != nil {
-		return garden, fmt.Errorf("#Hydrangea.GetConfig: %e", err)
+		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)
 	}
-	err = json.NewDecoder(res.Body).Decode(&garden)
-	if err != nil {
-		return garden, fmt.Errorf("#Hydrangea.GetConfig: %e", err)
-	}
-	return garden, nil
+	return req, nil
 }
 
-func (h Hydrangea) GetRALogs(RAId string, limit string) (RALogs, error) {
-	logs := RALogs{}
+func (h Hydrangea) CreateRALogsReq(RAId string, limit string) (*http.Request, error) {
+	h.RALogURL.Path = path.Join(h.RALogURL.Path, RAId)
 	values := h.RALogURL.Query()
-	values.Add("id", RAId)
-	values.Add("limit", limit)
+	values.Set("limit", limit)
 	h.RALogURL.RawQuery = values.Encode()
-	res, err := http.Get(h.RALogURL.String())
+	req, err := http.NewRequest("GET", h.RALogURL.String(), strings.NewReader(""))
 	if err != nil {
-		return logs, fmt.Errorf("#Hydrangea.GetRALogs: %e", err)
+		return nil, fmt.Errorf("#Hydrangea.CreateRALogsReq: %e", err)
 	}
-	err = json.NewDecoder(res.Body).Decode(&logs)
-	if err != nil {
-		return logs, fmt.Errorf("#Hydrangea.GetRALogs: %e", err)
-	}
-	return logs, nil
+	return req, nil
 }
 
-func (h Hydrangea) GetSensorLogs(SensorId string, limit string) (SensorLogs, error) {
-	logs := SensorLogs{}
+func (h Hydrangea) CreateSensorLogsReq(SensorId string, limit string) (*http.Request, error) {
+	h.SensorLogURL.Path = path.Join(h.SensorLogURL.Path, SensorId)
 	values := h.SensorLogURL.Query()
-	values.Add("id", SensorId)
-	values.Add("limit", limit)
+	values.Set("limit", limit)
 	h.SensorLogURL.RawQuery = values.Encode()
-	res, err := http.Get(h.SensorLogURL.String())
+	req, err := http.NewRequest("GET", h.SensorLogURL.String(), strings.NewReader(""))
 	if err != nil {
-		return logs, fmt.Errorf("#Hydrangea.GetSensorLogs: %e", err)
+		return nil, fmt.Errorf("#Hydrangea.CreateSensorLogsReq: %e", err)
 	}
-	err = json.NewDecoder(res.Body).Decode(&logs)
-	if err != nil {
-		return logs, fmt.Errorf("#Hydrangea.GetSensorLogs: %e", err)
-	}
-	return logs, nil
+	return req, nil
 }
