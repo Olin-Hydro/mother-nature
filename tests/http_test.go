@@ -3,7 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/Olin-Hydro/mother-nature/pkg"
@@ -14,7 +14,8 @@ func TestDecodeJson(t *testing.T) {
 	b, err := json.Marshal(mockGarden())
 	assert.NoError(t, err)
 	garden := pkg.Garden{}
-	r := ioutil.NopCloser(bytes.NewReader(b))
+	//nolint:staticcheck
+	r := io.NopCloser(bytes.NewReader(b))
 	err = pkg.DecodeJson(&garden, r)
 	assert.NoError(t, err)
 	assert.Equal(t, mockGarden(), garden)
