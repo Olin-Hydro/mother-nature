@@ -3,7 +3,8 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+
+	"io"
 	"net/http"
 	"testing"
 
@@ -63,8 +64,7 @@ func TestGetConfig(t *testing.T) {
 	mockClient := mocks.NewMockHTTPClient(ctrl)
 	b, err := json.Marshal(mockGarden())
 	assert.NoError(t, err)
-	//nolint:staticcheck
-	r := ioutil.NopCloser(bytes.NewReader(b))
+	r := io.NopCloser(bytes.NewReader(b))
 	res := http.Response{
 		StatusCode: 200,
 		Body:       r,
