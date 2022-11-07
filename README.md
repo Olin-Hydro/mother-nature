@@ -16,3 +16,8 @@ go build cmd/main.go
 go vet cmd/
 golangci-lint run
 ```
+
+To run the test suite:
+```
+go test github.com/Olin-Hydro/mother-nature/tests
+```
