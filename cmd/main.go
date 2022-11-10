@@ -1,4 +1,4 @@
-package main
+package mn
 
 import (
 	"encoding/json"
@@ -30,6 +30,7 @@ type ScheduledCommand struct {
 	Datetime int64   `json:"datetime"`
 }
 
+//nolint:unused
 func encodeCmd(cmd Command) (b []byte, e error) {
 	b, err := json.Marshal(cmd)
 	if err != nil {
@@ -38,6 +39,7 @@ func encodeCmd(cmd Command) (b []byte, e error) {
 	return b, nil
 }
 
+//nolint:unused
 func decodeCmd(b []byte) (cmd Command, e error) {
 	err := json.Unmarshal(b, &cmd)
 	if err != nil {
@@ -46,14 +48,24 @@ func decodeCmd(b []byte) (cmd Command, e error) {
 	return cmd, nil
 }
 
-func getGardenConfig(store pkg.Storage, gardenId string) (pkg.GardenConfig, error) {
-	garden, err := store.GetGarden(gardenId)
+func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) (pkg.GardenConfig, error) {
+	garden := pkg.Garden{}
+	req, err := store.CreateGardenReq(gardenId)
+	if err != nil {
+		return garden.Config, fmt.Errorf("#getConfig: %e", err)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return garden.Config, fmt.Errorf("#getConfig: %e", err)
+	}
+	err = pkg.DecodeJson(&garden, res.Body)
 	if err != nil {
 		return garden.Config, fmt.Errorf("#getConfig: %e", err)
 	}
 	return garden.Config, nil
 }
 
+//nolint:unused
 func main() {
 	conf := pkg.LoadConfigFromEnv()
 	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaSensorLogURL)
@@ -61,7 +73,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	gardenConfig, err := getGardenConfig(h, conf.GardenId)
+	client := pkg.Client
+	gardenConfig, err := GetGardenConfig(h, client, conf.GardenId)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -1,8 +1,14 @@
-package main
+package tests
 
 import (
+	"bytes"
+	"encoding/json"
+
+	"io"
+	"net/http"
 	"testing"
 
+	mn "github.com/Olin-Hydro/mother-nature/cmd"
 	"github.com/Olin-Hydro/mother-nature/mocks"
 	"github.com/Olin-Hydro/mother-nature/pkg"
 
@@ -54,8 +60,17 @@ func TestGetConfig(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockStorage := mocks.NewMockStorage(ctrl)
-	mockStorage.EXPECT().GetGarden("abc").Return(mockGarden(), nil)
-	gardenConfig, err := getGardenConfig(mockStorage, "abc")
+	mockStorage.EXPECT().CreateGardenReq("abc").Return(&http.Request{}, nil)
+	mockClient := mocks.NewMockHTTPClient(ctrl)
+	b, err := json.Marshal(mockGarden())
+	assert.NoError(t, err)
+	r := io.NopCloser(bytes.NewReader(b))
+	res := http.Response{
+		StatusCode: 200,
+		Body:       r,
+	}
+	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
+	gardenConfig, err := mn.GetGardenConfig(mockStorage, mockClient, "abc")
 	assert.NoError(t, err)
 	assert.Equal(t, mockGarden().Config, gardenConfig)
 }

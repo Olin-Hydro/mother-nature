@@ -5,9 +5,9 @@
 package mocks
 
 import (
+	http "net/http"
 	reflect "reflect"
 
-	pkg "github.com/Olin-Hydro/mother-nature/pkg"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -34,47 +34,47 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 	return m.recorder
 }
 
-// GetGarden mocks base method.
-func (m *MockStorage) GetGarden(gardenId string) (pkg.Garden, error) {
+// CreateGardenReq mocks base method.
+func (m *MockStorage) CreateGardenReq(gardenId string) (*http.Request, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGarden", gardenId)
-	ret0, _ := ret[0].(pkg.Garden)
+	ret := m.ctrl.Call(m, "CreateGardenReq", gardenId)
+	ret0, _ := ret[0].(*http.Request)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetGarden indicates an expected call of GetGarden.
-func (mr *MockStorageMockRecorder) GetGarden(gardenId interface{}) *gomock.Call {
+// CreateGardenReq indicates an expected call of CreateGardenReq.
+func (mr *MockStorageMockRecorder) CreateGardenReq(gardenId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGarden", reflect.TypeOf((*MockStorage)(nil).GetGarden), gardenId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGardenReq", reflect.TypeOf((*MockStorage)(nil).CreateGardenReq), gardenId)
 }
 
-// GetRALogs mocks base method.
-func (m *MockStorage) GetRALogs(RAId, limit string) (pkg.RALogs, error) {
+// CreateRALogsReq mocks base method.
+func (m *MockStorage) CreateRALogsReq(RAId, limit string) (*http.Request, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRALogs", RAId, limit)
-	ret0, _ := ret[0].(pkg.RALogs)
+	ret := m.ctrl.Call(m, "CreateRALogsReq", RAId, limit)
+	ret0, _ := ret[0].(*http.Request)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetRALogs indicates an expected call of GetRALogs.
-func (mr *MockStorageMockRecorder) GetRALogs(RAId, limit interface{}) *gomock.Call {
+// CreateRALogsReq indicates an expected call of CreateRALogsReq.
+func (mr *MockStorageMockRecorder) CreateRALogsReq(RAId, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRALogs", reflect.TypeOf((*MockStorage)(nil).GetRALogs), RAId, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRALogsReq", reflect.TypeOf((*MockStorage)(nil).CreateRALogsReq), RAId, limit)
 }
 
-// GetSensorLogs mocks base method.
-func (m *MockStorage) GetSensorLogs(SensorId, limit string) (pkg.SensorLogs, error) {
+// CreateSensorLogsReq mocks base method.
+func (m *MockStorage) CreateSensorLogsReq(SensorId, limit string) (*http.Request, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSensorLogs", SensorId, limit)
-	ret0, _ := ret[0].(pkg.SensorLogs)
+	ret := m.ctrl.Call(m, "CreateSensorLogsReq", SensorId, limit)
+	ret0, _ := ret[0].(*http.Request)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetSensorLogs indicates an expected call of GetSensorLogs.
-func (mr *MockStorageMockRecorder) GetSensorLogs(SensorId, limit interface{}) *gomock.Call {
+// CreateSensorLogsReq indicates an expected call of CreateSensorLogsReq.
+func (mr *MockStorageMockRecorder) CreateSensorLogsReq(SensorId, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSensorLogs", reflect.TypeOf((*MockStorage)(nil).GetSensorLogs), SensorId, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSensorLogsReq", reflect.TypeOf((*MockStorage)(nil).CreateSensorLogsReq), SensorId, limit)
 }
