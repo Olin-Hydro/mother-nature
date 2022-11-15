@@ -16,14 +16,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func mockGarden() pkg.Garden {
+const (
+	sensorId       = "abc432"
+	raId           = "abc234"
+	saId           = "abc654"
+	gardenConfigId = "abc321"
+	gardenId       = "abc123"
+)
+
+func mockGardenConfig() pkg.GardenConfig {
 	sensor := pkg.SensorConfig{
-		Id:       "abc432",
+		Id:       sensorId,
 		Interval: 300.0,
 	}
 	sensors := []pkg.SensorConfig{sensor}
 	raConfig := pkg.RAConfig{
-		Id:            "abc234",
+		Id:            raId,
 		Interval:      1200.0,
 		Threshold:     8.0,
 		Duration:      5.0,
@@ -33,27 +41,61 @@ func mockGarden() pkg.Garden {
 	onTimes := []string{"1970-01-01T00:00:00.000Z"}
 	offTimes := []string{"1970-01-01T00:01:00.000Z"}
 	saConfig := pkg.SAConfig{
-		Id:  "abc654",
+		Id:  saId,
 		On:  onTimes,
 		Off: offTimes,
 	}
 	sas := []pkg.SAConfig{saConfig}
 	gardenConfig := pkg.GardenConfig{
-		Id:                 "abc321",
+		Id:                 gardenConfigId,
 		Name:               "Config_1",
 		Sensors:            sensors,
 		ScheduledActuators: sas,
 		ReactiveActuators:  ras,
 		CreatedAt:          "1970-01-01T00:00:00.000Z",
 	}
+	return gardenConfig
+}
+
+func mockGarden() pkg.Garden {
 	garden := pkg.Garden{
-		Id:        "abc123",
+		Id:        gardenId,
 		Name:      "Garden_1",
 		Location:  "Mac_3_EndCap",
-		Config:    gardenConfig,
+		Config:    mockGardenConfig(),
 		CreatedAt: "1970-01-01T00:00:00.000Z",
 	}
 	return garden
+}
+
+func mockScheduledCmds() []pkg.ScheduledCommand {
+	var schedCmds []pkg.ScheduledCommand
+	cmdOn := pkg.Command{
+		CmdType: pkg.ScheduledActuator,
+		Id:      saId,
+		Cmd:     1,
+	}
+	cmdOff := pkg.Command{
+		CmdType: pkg.ScheduledActuator,
+		Id:      saId,
+		Cmd:     0,
+	}
+	saCmdOn := pkg.ScheduledCommand{
+		Cmd:      cmdOn,
+		Datetime: 0,
+	}
+	saCmdOff := pkg.ScheduledCommand{
+		Cmd:      cmdOff,
+		Datetime: 60,
+	}
+	schedCmds = append(schedCmds, saCmdOff, saCmdOn)
+	return schedCmds
+}
+
+func mockSchedule() pkg.Schedule {
+	return pkg.Schedule{
+		Cmds: mockScheduledCmds(),
+	}
 }
 
 func TestGetConfig(t *testing.T) {
