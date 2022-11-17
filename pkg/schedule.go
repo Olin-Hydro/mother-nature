@@ -11,8 +11,8 @@ type Schedule struct {
 }
 
 type ScheduledCommand struct {
-	Cmd      Command `json:"cmd"`
-	Datetime int64   `json:"datetime"`
+	Cmd  Command `json:"cmd"`
+	Time string  `json:"time"`
 }
 
 func strToTime(dtStr string) (time.Time, error) {
@@ -26,8 +26,8 @@ func strToTime(dtStr string) (time.Time, error) {
 
 func newScheduledCommand(cmd Command, dt time.Time) ScheduledCommand {
 	schedCmd := ScheduledCommand{
-		Cmd:      cmd,
-		Datetime: dt.Unix(),
+		Cmd:  cmd,
+		Time: dt.Format("15:04:05"),
 	}
 	return schedCmd
 }

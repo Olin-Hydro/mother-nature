@@ -81,12 +81,12 @@ func mockScheduledCmds() []pkg.ScheduledCommand {
 		Cmd:     0,
 	}
 	saCmdOn := pkg.ScheduledCommand{
-		Cmd:      cmdOn,
-		Datetime: 0,
+		Cmd:  cmdOn,
+		Time: "00:00:00",
 	}
 	saCmdOff := pkg.ScheduledCommand{
-		Cmd:      cmdOff,
-		Datetime: 60,
+		Cmd:  cmdOff,
+		Time: "00:01:00",
 	}
 	schedCmds = append(schedCmds, saCmdOff, saCmdOn)
 	return schedCmds
