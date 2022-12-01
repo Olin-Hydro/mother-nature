@@ -15,11 +15,11 @@ type ScheduledCommand struct {
 	Time string  `json:"time"`
 }
 
-func strToTime(dtStr string) (time.Time, error) {
+func StrToTime(dtStr string) (time.Time, error) {
 	layout := "2006-01-02T15:04:05.000Z"
 	dt, err := time.Parse(layout, dtStr)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("#strToTime: %e", err)
+		return time.Time{}, fmt.Errorf("#StrToTime: %e", err)
 	}
 	return dt, nil
 }
@@ -35,7 +35,7 @@ func newScheduledCommand(cmd Command, dt time.Time) ScheduledCommand {
 func createScheduledCmds(SAconf SAConfig) ([]ScheduledCommand, error) {
 	var schedCmds []ScheduledCommand
 	for t := 0; t < len(SAconf.Off); t++ {
-		dt, err := strToTime(SAconf.Off[t])
+		dt, err := StrToTime(SAconf.Off[t])
 		if err != nil {
 			return schedCmds, fmt.Errorf("#NewSchedule: %e", err)
 		}
@@ -44,7 +44,7 @@ func createScheduledCmds(SAconf SAConfig) ([]ScheduledCommand, error) {
 		schedCmds = append(schedCmds, schedCmd)
 	}
 	for t := 0; t < len(SAconf.On); t++ {
-		dt, err := strToTime(SAconf.On[t])
+		dt, err := StrToTime(SAconf.On[t])
 		if err != nil {
 			return schedCmds, fmt.Errorf("#NewSchedule: %e", err)
 		}
