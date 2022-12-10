@@ -23,34 +23,6 @@ func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) 
 	return garden.Config, nil
 }
 
-func UpdateActuationTimes(actuationTimes pkg.RActuationTimes, raConfigs []pkg.RAConfig, client pkg.HTTPClient, store pkg.Storage) (pkg.RActuationTimes, error) {
-	for i := 0; i < len(raConfigs); i++ {
-		raConfig := raConfigs[i]
-		if _, ok := actuationTimes.Times[raConfig.Id]; ok {
-			continue
-		}
-		req, err := store.CreateRALogsReq(raConfig.Id, "1")
-		if err != nil {
-			return actuationTimes, fmt.Errorf("InitActuationTimes: %e", err)
-		}
-		res, err := client.Do(req)
-		if err != nil {
-			return actuationTimes, fmt.Errorf("InitActuationTimes: %e", err)
-		}
-		raLog := pkg.RALog{}
-		err = pkg.DecodeJson(&raLog, res.Body)
-		if err != nil {
-			return actuationTimes, fmt.Errorf("InitActuationTimes: %e", err)
-		}
-		actTime, err := pkg.StrToTime(raLog.CreatedAt)
-		if err != nil {
-			return actuationTimes, fmt.Errorf("InitActuationTimes: %e", err)
-		}
-		actuationTimes.Times[raConfig.Id] = actTime
-	}
-	return actuationTimes, nil
-}
-
 func SendSchedule(gardenConfig pkg.GardenConfig) error {
 	schedule, err := pkg.NewSchedule(gardenConfig)
 	if err != nil {
@@ -68,7 +40,7 @@ func SendSchedule(gardenConfig pkg.GardenConfig) error {
 //nolint:unused
 func main() {
 	conf := pkg.LoadConfigFromEnv()
-	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaSensorLogURL)
+	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaRAURL, conf.HydrangeaSensorLogURL)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -84,7 +56,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	pkg.ActuationTimes, err = UpdateActuationTimes(pkg.ActuationTimes, gardenConfig.ReactiveActuators, client, h)
+	pkg.Cache, err = pkg.UpdateRACache(pkg.Cache, gardenConfig.ReactiveActuators, client, h)
 	if err != nil {
 		fmt.Println(err)
 		return

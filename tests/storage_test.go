@@ -10,12 +10,13 @@ import (
 const (
 	BaseURL     = "https://test.com"
 	GardenRoute = "/garden"
+	RaLogRoute  = "/ra/logging/actions"
 	RaRoute     = "/ra"
 	SensorRoute = "/sensor"
 )
 
 func MockHydrangea() (pkg.Hydrangea, error) {
-	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaRoute, BaseURL+SensorRoute)
+	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaLogRoute, BaseURL+RaRoute, BaseURL+SensorRoute)
 }
 
 func TestNewHydrangea(t *testing.T) {
