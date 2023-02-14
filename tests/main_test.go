@@ -3,7 +3,6 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"time"
 
 	"io"
 	"net/http"
@@ -29,12 +28,9 @@ const (
 
 func mockRaCache() pkg.RACache {
 	return pkg.RACache{
-		ActuationTimes: map[string]time.Time{
-			raConfId: time.Now().UTC().Add(-time.Duration(mockGardenConfig().ReactiveActuators[0].Interval+5) * time.Second),
-		},
 		SensorLogs: map[string]pkg.SensorLog{
 			raConfId: {
-				Id:        "log_id",
+				Id:        "abc",
 				Name:      "sensor_name",
 				SensorId:  sensorId,
 				Value:     sensorValue,
@@ -78,7 +74,7 @@ func mockSensorLogs() pkg.SensorLogs {
 		Logs: []pkg.SensorLog{
 			{
 				Id:        "abc",
-				Name:      "sensor_log_name",
+				Name:      "sensor_name",
 				SensorId:  sensorId,
 				Value:     sensorValue,
 				CreatedAt: "1970-01-01T00:00:00.000Z",
@@ -94,7 +90,7 @@ func mockGardenConfig() pkg.GardenConfig {
 	}
 	sensors := []pkg.SensorConfig{sensor}
 	raConfig := pkg.RAConfig{
-		Id:            raConfId,
+		RAId:          raConfId,
 		Interval:      1200.0,
 		Threshold:     8.0,
 		Duration:      5.0,
@@ -104,18 +100,18 @@ func mockGardenConfig() pkg.GardenConfig {
 	onTimes := []string{"1970-01-01T00:00:00.000Z"}
 	offTimes := []string{"1970-01-01T00:01:00.000Z"}
 	saConfig := pkg.SAConfig{
-		Id:  saId,
-		On:  onTimes,
-		Off: offTimes,
+		SAId: saId,
+		On:   onTimes,
+		Off:  offTimes,
 	}
 	sas := []pkg.SAConfig{saConfig}
 	gardenConfig := pkg.GardenConfig{
-		Id:                 gardenConfigId,
-		Name:               "Config_1",
-		Sensors:            sensors,
-		ScheduledActuators: sas,
-		ReactiveActuators:  ras,
-		CreatedAt:          "1970-01-01T00:00:00.000Z",
+		Id:        gardenConfigId,
+		Name:      "Config_1",
+		Sensors:   sensors,
+		SAConfigs: sas,
+		RAConfigs: ras,
+		CreatedAt: "1970-01-01T00:00:00.000Z",
 	}
 	return gardenConfig
 }

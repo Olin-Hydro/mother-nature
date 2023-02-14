@@ -17,12 +17,12 @@ type Garden struct {
 }
 
 type GardenConfig struct {
-	Id                 string         `json:"id"`
-	Name               string         `json:"name"`
-	Sensors            []SensorConfig `json:"sensors"`
-	ScheduledActuators []SAConfig     `json:"scheduled_actuators"`
-	ReactiveActuators  []RAConfig     `json:"reactive_actuators"`
-	CreatedAt          string         `json:"created_at"`
+	Id        string         `json:"id"`
+	Name      string         `json:"name"`
+	Sensors   []SensorConfig `json:"sensors"`
+	SAConfigs []SAConfig     `json:"scheduled_actuators"`
+	RAConfigs []RAConfig     `json:"reactive_actuators"`
+	CreatedAt string         `json:"created_at"`
 }
 
 type SensorConfig struct {
@@ -31,13 +31,13 @@ type SensorConfig struct {
 }
 
 type SAConfig struct {
-	Id  string   `json:"id"`
-	On  []string `json:"on"`
-	Off []string `json:"off"`
+	SAId string   `json:"id"`
+	On   []string `json:"on"`
+	Off  []string `json:"off"`
 }
 
 type RAConfig struct {
-	Id            string  `json:"id"`
+	RAId          string  `json:"id"`
 	Interval      float64 `json:"interval"`
 	Threshold     float64 `json:"threshold"`
 	Duration      float64 `json:"duration"`

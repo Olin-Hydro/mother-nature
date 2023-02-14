@@ -39,7 +39,7 @@ func createScheduledCmds(SAconf SAConfig) ([]ScheduledCommand, error) {
 		if err != nil {
 			return schedCmds, fmt.Errorf("#NewSchedule: %e", err)
 		}
-		cmd := newCommand(ScheduledActuator, SAconf.Id, 0)
+		cmd := newCommand(ScheduledActuator, SAconf.SAId, 0)
 		schedCmd := newScheduledCommand(cmd, dt)
 		schedCmds = append(schedCmds, schedCmd)
 	}
@@ -48,7 +48,7 @@ func createScheduledCmds(SAconf SAConfig) ([]ScheduledCommand, error) {
 		if err != nil {
 			return schedCmds, fmt.Errorf("#NewSchedule: %e", err)
 		}
-		cmd := newCommand(ScheduledActuator, SAconf.Id, 1)
+		cmd := newCommand(ScheduledActuator, SAconf.SAId, 1)
 		schedCmd := newScheduledCommand(cmd, dt)
 		schedCmds = append(schedCmds, schedCmd)
 	}
@@ -57,7 +57,7 @@ func createScheduledCmds(SAconf SAConfig) ([]ScheduledCommand, error) {
 
 func NewSchedule(gardenConfig GardenConfig) (Schedule, error) {
 	sched := Schedule{}
-	SAS := gardenConfig.ScheduledActuators
+	SAS := gardenConfig.SAConfigs
 	for i := 0; i < len(SAS); i++ {
 		SAconf := SAS[i]
 		schedCmds, err := createScheduledCmds(SAconf)

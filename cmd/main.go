@@ -56,7 +56,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	pkg.Cache, err = pkg.UpdateRACache(pkg.Cache, gardenConfig.ReactiveActuators, client, h)
+	pkg.Cache, err = pkg.UpdateRACache(pkg.Cache, gardenConfig.RAConfigs, client, h)
 	if err != nil {
 		fmt.Println(err)
 		return

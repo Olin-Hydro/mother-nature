@@ -32,7 +32,7 @@ func TestUpdateRACache(t *testing.T) {
 	defer ctrl.Finish()
 	mockStorage := mocks.NewMockStorage(ctrl)
 	mockClient := mocks.NewMockHTTPClient(ctrl)
-	raConfigs := mockGardenConfig().ReactiveActuators
+	raConfigs := mockGardenConfig().RAConfigs
 
 	b, err := json.Marshal(mockRA())
 	assert.NoError(t, err)
@@ -41,31 +41,18 @@ func TestUpdateRACache(t *testing.T) {
 		StatusCode: 200,
 		Body:       r,
 	}
-
-	mockStorage.EXPECT().CreateRAReq(raConfigs[0].Id).Return(&http.Request{}, nil)
+	mockStorage.EXPECT().CreateRAReq(raConfigs[0].RAId).Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
 
-	b, err = json.Marshal(mockSensorLogs())
+	b2, err := json.Marshal(mockSensorLogs())
 	assert.NoError(t, err)
-	r = io.NopCloser(bytes.NewReader(b))
-	res = http.Response{
+	r2 := io.NopCloser(bytes.NewReader(b2))
+	res2 := http.Response{
 		StatusCode: 200,
-		Body:       r,
+		Body:       r2,
 	}
 	mockStorage.EXPECT().CreateSensorLogsReq(sensorId, "1").Return(&http.Request{}, nil)
-	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
-
-	b, err = json.Marshal(mockRALogs())
-	assert.NoError(t, err)
-	r = io.NopCloser(bytes.NewReader(b))
-	res = http.Response{
-		StatusCode: 200,
-		Body:       r,
-	}
-
-	mockStorage.EXPECT().CreateRALogsReq(raId, "1").Return(&http.Request{}, nil)
-	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
-	fmt.Println(len(raConfigs))
+	mockClient.EXPECT().Do(&http.Request{}).Return(&res2, nil)
 	cache, err := pkg.UpdateRACache(pkg.Cache, raConfigs, mockClient, mockStorage)
 	assert.NoError(t, err)
 	assert.Equal(t, cache, mockRaCache())

@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"fmt"
-	"time"
 )
 
 type CommandType int
@@ -20,9 +19,8 @@ type Command struct {
 }
 
 type RACache struct {
-	ActuationTimes map[string]time.Time
-	SensorLogs     map[string]SensorLog
-	RAs            map[string]RA
+	SensorLogs map[string]SensorLog
+	RAs        map[string]RA
 }
 
 var (
@@ -43,7 +41,7 @@ func newCommand(cmdType CommandType, id string, cmd int) Command {
 }
 
 func CreateRACommands(conf GardenConfig) ([]Command, error) {
-	raConfigs := conf.ReactiveActuators
+	raConfigs := conf.RAConfigs
 	var cmds []Command
 	var errors []error
 	for i := 0; i < len(raConfigs); i++ {
@@ -56,7 +54,7 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 		if !needed {
 			continue
 		}
-		cmd := newCommand(ReactiveActuator, Cache.RAs[raConfig.Id].Id, 1)
+		cmd := newCommand(ReactiveActuator, Cache.RAs[raConfig.RAId].Id, 1)
 		cmds = append(cmds, cmd)
 	}
 	if len(errors) != 0 {
@@ -65,25 +63,14 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 	return cmds, nil
 }
 
-func isPassedInterval(raConfig RAConfig) bool {
-	timeDiff := time.Now().UTC().Sub(Cache.ActuationTimes[raConfig.Id]).Seconds()
-	if timeDiff <= raConfig.Interval {
-		return false
-	}
-	return true
-}
-
 func raCommandNeeded(raConfig RAConfig) (bool, error) {
-	if !isPassedInterval(raConfig) {
-		return false, nil
-	}
 	switch raConfig.ThresholdType {
 	case 0:
-		if raConfig.Threshold < Cache.SensorLogs[raConfig.Id].Value {
+		if raConfig.Threshold < Cache.SensorLogs[raConfig.RAId].Value {
 			return true, nil
 		}
 	case 1:
-		if raConfig.Threshold > Cache.SensorLogs[raConfig.Id].Value {
+		if raConfig.Threshold > Cache.SensorLogs[raConfig.RAId].Value {
 			return true, nil
 		}
 	default:
@@ -153,28 +140,17 @@ func getRaLogs(raId string, store Storage, client HTTPClient) (RALog, error) {
 
 func UpdateRACache(Cache RACache, raConfigs []RAConfig, client HTTPClient, store Storage) (RACache, error) {
 	for i := 0; i < len(raConfigs); i++ {
-		raConfigId := raConfigs[i].Id
-		// TODO: Add if to check if ra exists already
+		raConfigId := raConfigs[i].RAId
 		ra, err := getRa(raConfigId, store, client)
 		if err != nil {
 			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
 		}
 		Cache.RAs[raConfigId] = ra
-		sensorLog, err := getSensorLog(Cache.RAs[raConfigId].SensorId, store, client)
+		sensorLog, err := getSensorLog(ra.SensorId, store, client)
 		if err != nil {
 			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
 		}
 		Cache.SensorLogs[raConfigId] = sensorLog
-		fmt.Println(sensorLog)
-		raLog, err := getRaLogs(Cache.RAs[raConfigId].Id, store, client)
-		if err != nil {
-			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
-		}
-		actTime, err := StrToTime(raLog.CreatedAt)
-		if err != nil {
-			return Cache, fmt.Errorf("UpdateRACache: %e", err)
-		}
-		Cache.ActuationTimes[raConfigId] = actTime
 	}
 	return Cache, nil
 }
