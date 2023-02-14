@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
 	"io"
 	"net/http"
@@ -18,11 +19,73 @@ import (
 
 const (
 	sensorId       = "abc432"
-	raId           = "abc234"
+	raConfId       = "abc234"
+	raId           = "abc112"
 	saId           = "abc654"
 	gardenConfigId = "abc321"
 	gardenId       = "abc123"
+	sensorValue    = 1.1
 )
+
+func mockRaCache() pkg.RACache {
+	return pkg.RACache{
+		ActuationTimes: map[string]time.Time{
+			raConfId: time.Now().UTC().Add(-time.Duration(mockGardenConfig().ReactiveActuators[0].Interval+5) * time.Second),
+		},
+		SensorLogs: map[string]pkg.SensorLog{
+			raConfId: {
+				Id:        "log_id",
+				Name:      "sensor_name",
+				SensorId:  sensorId,
+				Value:     sensorValue,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+		RAs: map[string]pkg.RA{
+			raConfId: {
+				Id:        raId,
+				Name:      "ra_name",
+				SensorId:  sensorId,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+	}
+}
+
+func mockRA() pkg.RA {
+	return pkg.RA{
+		Id:        raId,
+		Name:      "ra_name",
+		SensorId:  sensorId,
+		CreatedAt: "1970-01-01T00:00:00.000Z",
+	}
+}
+
+func mockRALogs() pkg.RALogs {
+	return pkg.RALogs{
+		Logs: []pkg.RALog{{
+			Id:         "abc",
+			Name:       "ra_log_name",
+			ActuatorId: raId,
+			Data:       "1",
+			CreatedAt:  "1970-01-01T00:00:00.000Z",
+		}},
+	}
+}
+
+func mockSensorLogs() pkg.SensorLogs {
+	return pkg.SensorLogs{
+		Logs: []pkg.SensorLog{
+			{
+				Id:        "abc",
+				Name:      "sensor_log_name",
+				SensorId:  sensorId,
+				Value:     sensorValue,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+	}
+}
 
 func mockGardenConfig() pkg.GardenConfig {
 	sensor := pkg.SensorConfig{
@@ -31,7 +94,7 @@ func mockGardenConfig() pkg.GardenConfig {
 	}
 	sensors := []pkg.SensorConfig{sensor}
 	raConfig := pkg.RAConfig{
-		Id:            raId,
+		Id:            raConfId,
 		Interval:      1200.0,
 		Threshold:     8.0,
 		Duration:      5.0,

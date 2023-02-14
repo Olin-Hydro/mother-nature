@@ -78,7 +78,7 @@ type SensorLog struct {
 type Storage interface {
 	CreateGardenReq(gardenId string) (*http.Request, error)
 	CreateRALogsReq(RAId string, limit string) (*http.Request, error)
-	CreateRAReq(RAId string) (*http.Request, error)
+	CreateRAReq(RAConfigId string) (*http.Request, error)
 	CreateSensorLogsReq(SensorId string, limit string) (*http.Request, error)
 }
 
@@ -114,8 +114,8 @@ func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL 
 	return h, nil
 }
 
-func (h Hydrangea) CreateRAReq(RAId string) (*http.Request, error) {
-	h.GardenURL.Path = path.Join(h.RAURL.Path, RAId)
+func (h Hydrangea) CreateRAReq(RAConfigId string) (*http.Request, error) {
+	h.RAURL.Path = path.Join(h.RAURL.Path, RAConfigId)
 	req, err := http.NewRequest("GET", h.RAURL.String(), strings.NewReader(""))
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)

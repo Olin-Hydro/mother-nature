@@ -65,18 +65,18 @@ func (mr *MockStorageMockRecorder) CreateRALogsReq(RAId, limit interface{}) *gom
 }
 
 // CreateRAReq mocks base method.
-func (m *MockStorage) CreateRAReq(RAId string) (*http.Request, error) {
+func (m *MockStorage) CreateRAReq(RAConfigId string) (*http.Request, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRAReq", RAId)
+	ret := m.ctrl.Call(m, "CreateRAReq", RAConfigId)
 	ret0, _ := ret[0].(*http.Request)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateRAReq indicates an expected call of CreateRAReq.
-func (mr *MockStorageMockRecorder) CreateRAReq(RAId interface{}) *gomock.Call {
+func (mr *MockStorageMockRecorder) CreateRAReq(RAConfigId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRAReq", reflect.TypeOf((*MockStorage)(nil).CreateRAReq), RAId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRAReq", reflect.TypeOf((*MockStorage)(nil).CreateRAReq), RAConfigId)
 }
 
 // CreateSensorLogsReq mocks base method.
