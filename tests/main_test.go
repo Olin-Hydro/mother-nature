@@ -57,18 +57,6 @@ func mockRA() pkg.RA {
 	}
 }
 
-func mockRALogs() pkg.RALogs {
-	return pkg.RALogs{
-		Logs: []pkg.RALog{{
-			Id:         "abc",
-			Name:       "ra_log_name",
-			ActuatorId: raId,
-			Data:       "1",
-			CreatedAt:  "1970-01-01T00:00:00.000Z",
-		}},
-	}
-}
-
 func mockSensorLogs() pkg.SensorLogs {
 	return pkg.SensorLogs{
 		Logs: []pkg.SensorLog{
@@ -125,36 +113,6 @@ func mockGarden() pkg.Garden {
 		CreatedAt: "1970-01-01T00:00:00.000Z",
 	}
 	return garden
-}
-
-func mockScheduledCmds() []pkg.ScheduledCommand {
-	var schedCmds []pkg.ScheduledCommand
-	cmdOn := pkg.Command{
-		CmdType: pkg.ScheduledActuator,
-		Id:      saId,
-		Cmd:     1,
-	}
-	cmdOff := pkg.Command{
-		CmdType: pkg.ScheduledActuator,
-		Id:      saId,
-		Cmd:     0,
-	}
-	saCmdOn := pkg.ScheduledCommand{
-		Cmd:  cmdOn,
-		Time: "00:00:00",
-	}
-	saCmdOff := pkg.ScheduledCommand{
-		Cmd:  cmdOff,
-		Time: "00:01:00",
-	}
-	schedCmds = append(schedCmds, saCmdOff, saCmdOn)
-	return schedCmds
-}
-
-func mockSchedule() pkg.Schedule {
-	return pkg.Schedule{
-		Cmds: mockScheduledCmds(),
-	}
 }
 
 func TestGetConfig(t *testing.T) {

@@ -117,27 +117,6 @@ func getSensorLog(sensorId string, store Storage, client HTTPClient) (SensorLog,
 	return sensorLogs.Logs[0], nil
 }
 
-func getRaLogs(raId string, store Storage, client HTTPClient) (RALog, error) {
-	raLog := RALog{}
-	raLogs := RALogs{}
-	req, err := store.CreateRALogsReq(raId, "1")
-	if err != nil {
-		return raLog, fmt.Errorf("#getRaLogs: %e", err)
-	}
-	res, err := client.Do(req)
-	if err != nil {
-		return raLog, fmt.Errorf("#getRaLogs: %e", err)
-	}
-	err = DecodeJson(&raLogs, res.Body)
-	if err != nil {
-		return raLog, fmt.Errorf("getRaLogs: %e", err)
-	}
-	if len(raLogs.Logs) != 1 {
-		return raLog, fmt.Errorf("#getSensorLog: storage returned wrong number of logs: expected 1 got %d", len(raLogs.Logs))
-	}
-	return raLogs.Logs[0], nil
-}
-
 func UpdateRACache(Cache RACache, raConfigs []RAConfig, client HTTPClient, store Storage) (RACache, error) {
 	for i := 0; i < len(raConfigs); i++ {
 		raConfigId := raConfigs[i].RAId
