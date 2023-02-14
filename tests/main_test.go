@@ -18,11 +18,58 @@ import (
 
 const (
 	sensorId       = "abc432"
-	raId           = "abc234"
+	raConfId       = "abc234"
+	raId           = "abc112"
 	saId           = "abc654"
 	gardenConfigId = "abc321"
 	gardenId       = "abc123"
+	sensorValue    = 1.1
 )
+
+func mockRaCache() pkg.RACache {
+	return pkg.RACache{
+		SensorLogs: map[string]pkg.SensorLog{
+			raConfId: {
+				Id:        "abc",
+				Name:      "sensor_name",
+				SensorId:  sensorId,
+				Value:     sensorValue,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+		RAs: map[string]pkg.RA{
+			raConfId: {
+				Id:        raId,
+				Name:      "ra_name",
+				SensorId:  sensorId,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+	}
+}
+
+func mockRA() pkg.RA {
+	return pkg.RA{
+		Id:        raId,
+		Name:      "ra_name",
+		SensorId:  sensorId,
+		CreatedAt: "1970-01-01T00:00:00.000Z",
+	}
+}
+
+func mockSensorLogs() pkg.SensorLogs {
+	return pkg.SensorLogs{
+		Logs: []pkg.SensorLog{
+			{
+				Id:        "abc",
+				Name:      "sensor_name",
+				SensorId:  sensorId,
+				Value:     sensorValue,
+				CreatedAt: "1970-01-01T00:00:00.000Z",
+			},
+		},
+	}
+}
 
 func mockGardenConfig() pkg.GardenConfig {
 	sensor := pkg.SensorConfig{
@@ -31,7 +78,7 @@ func mockGardenConfig() pkg.GardenConfig {
 	}
 	sensors := []pkg.SensorConfig{sensor}
 	raConfig := pkg.RAConfig{
-		Id:            raId,
+		RAId:          raConfId,
 		Interval:      1200.0,
 		Threshold:     8.0,
 		Duration:      5.0,
@@ -41,18 +88,18 @@ func mockGardenConfig() pkg.GardenConfig {
 	onTimes := []string{"1970-01-01T00:00:00.000Z"}
 	offTimes := []string{"1970-01-01T00:01:00.000Z"}
 	saConfig := pkg.SAConfig{
-		Id:  saId,
-		On:  onTimes,
-		Off: offTimes,
+		SAId: saId,
+		On:   onTimes,
+		Off:  offTimes,
 	}
 	sas := []pkg.SAConfig{saConfig}
 	gardenConfig := pkg.GardenConfig{
-		Id:                 gardenConfigId,
-		Name:               "Config_1",
-		Sensors:            sensors,
-		ScheduledActuators: sas,
-		ReactiveActuators:  ras,
-		CreatedAt:          "1970-01-01T00:00:00.000Z",
+		Id:        gardenConfigId,
+		Name:      "Config_1",
+		Sensors:   sensors,
+		SAConfigs: sas,
+		RAConfigs: ras,
+		CreatedAt: "1970-01-01T00:00:00.000Z",
 	}
 	return gardenConfig
 }
@@ -66,36 +113,6 @@ func mockGarden() pkg.Garden {
 		CreatedAt: "1970-01-01T00:00:00.000Z",
 	}
 	return garden
-}
-
-func mockScheduledCmds() []pkg.ScheduledCommand {
-	var schedCmds []pkg.ScheduledCommand
-	cmdOn := pkg.Command{
-		CmdType: pkg.ScheduledActuator,
-		Id:      saId,
-		Cmd:     1,
-	}
-	cmdOff := pkg.Command{
-		CmdType: pkg.ScheduledActuator,
-		Id:      saId,
-		Cmd:     0,
-	}
-	saCmdOn := pkg.ScheduledCommand{
-		Cmd:  cmdOn,
-		Time: "00:00:00",
-	}
-	saCmdOff := pkg.ScheduledCommand{
-		Cmd:  cmdOff,
-		Time: "00:01:00",
-	}
-	schedCmds = append(schedCmds, saCmdOff, saCmdOn)
-	return schedCmds
-}
-
-func mockSchedule() pkg.Schedule {
-	return pkg.Schedule{
-		Cmds: mockScheduledCmds(),
-	}
 }
 
 func TestGetConfig(t *testing.T) {

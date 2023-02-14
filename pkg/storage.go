@@ -17,12 +17,12 @@ type Garden struct {
 }
 
 type GardenConfig struct {
-	Id                 string         `json:"id"`
-	Name               string         `json:"name"`
-	Sensors            []SensorConfig `json:"sensors"`
-	ScheduledActuators []SAConfig     `json:"scheduled_actuators"`
-	ReactiveActuators  []RAConfig     `json:"reactive_actuators"`
-	CreatedAt          string         `json:"created_at"`
+	Id        string         `json:"id"`
+	Name      string         `json:"name"`
+	Sensors   []SensorConfig `json:"sensors"`
+	SAConfigs []SAConfig     `json:"scheduled_actuators"`
+	RAConfigs []RAConfig     `json:"reactive_actuators"`
+	CreatedAt string         `json:"created_at"`
 }
 
 type SensorConfig struct {
@@ -31,13 +31,13 @@ type SensorConfig struct {
 }
 
 type SAConfig struct {
-	Id  string   `json:"id"`
-	On  []string `json:"on"`
-	Off []string `json:"off"`
+	SAId string   `json:"id"`
+	On   []string `json:"on"`
+	Off  []string `json:"off"`
 }
 
 type RAConfig struct {
-	Id            string  `json:"id"`
+	RAId          string  `json:"id"`
 	Interval      float64 `json:"interval"`
 	Threshold     float64 `json:"threshold"`
 	Duration      float64 `json:"duration"`
@@ -45,7 +45,14 @@ type RAConfig struct {
 }
 
 type RALogs struct {
-	Logs []RALogs `json:"logs"`
+	Logs []RALog `json:"logs"`
+}
+
+type RA struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	SensorId  string `json:"sensor_id"`
+	CreatedAt string `json:"created_at"`
 }
 
 type RALog struct {
@@ -71,6 +78,7 @@ type SensorLog struct {
 type Storage interface {
 	CreateGardenReq(gardenId string) (*http.Request, error)
 	CreateRALogsReq(RAId string, limit string) (*http.Request, error)
+	CreateRAReq(RAConfigId string) (*http.Request, error)
 	CreateSensorLogsReq(SensorId string, limit string) (*http.Request, error)
 }
 
@@ -78,9 +86,10 @@ type Hydrangea struct {
 	GardenURL    url.URL
 	RALogURL     url.URL
 	SensorLogURL url.URL
+	RAURL        url.URL
 }
 
-func NewHydrangea(gardenURL string, raLogURL string, sensorLogURL string) (Hydrangea, error) {
+func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL string) (Hydrangea, error) {
 	h := Hydrangea{}
 	u, err := url.Parse(gardenURL)
 	if err != nil {
@@ -92,12 +101,26 @@ func NewHydrangea(gardenURL string, raLogURL string, sensorLogURL string) (Hydra
 		return h, fmt.Errorf("#NewHydrangea: %e", err)
 	}
 	h.RALogURL = *u
+	u, err = url.Parse(raURL)
+	if err != nil {
+		return h, fmt.Errorf("#NewHydrangea: %e", err)
+	}
+	h.RAURL = *u
 	u, err = url.Parse(sensorLogURL)
 	if err != nil {
 		return h, fmt.Errorf("#NewHydrangea: %e", err)
 	}
 	h.SensorLogURL = *u
 	return h, nil
+}
+
+func (h Hydrangea) CreateRAReq(RAConfigId string) (*http.Request, error) {
+	h.RAURL.Path = path.Join(h.RAURL.Path, RAConfigId)
+	req, err := http.NewRequest("GET", h.RAURL.String(), strings.NewReader(""))
+	if err != nil {
+		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)
+	}
+	return req, nil
 }
 
 func (h Hydrangea) CreateGardenReq(gardenId string) (*http.Request, error) {

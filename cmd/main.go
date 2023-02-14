@@ -3,11 +3,11 @@ package mn
 import (
 	"fmt"
 
-	"github.com/Olin-Hydro/mother-nature/pkg"
+	mn "github.com/Olin-Hydro/mother-nature/pkg"
 )
 
-func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) (pkg.GardenConfig, error) {
-	garden := pkg.Garden{}
+func GetGardenConfig(store mn.Storage, client mn.HTTPClient, gardenId string) (mn.GardenConfig, error) {
+	garden := mn.Garden{}
 	req, err := store.CreateGardenReq(gardenId)
 	if err != nil {
 		return garden.Config, fmt.Errorf("#getConfig: %e", err)
@@ -16,7 +16,7 @@ func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) 
 	if err != nil {
 		return garden.Config, fmt.Errorf("#getConfig: %e", err)
 	}
-	err = pkg.DecodeJson(&garden, res.Body)
+	err = mn.DecodeJson(&garden, res.Body)
 	if err != nil {
 		return garden.Config, fmt.Errorf("#getConfig: %e", err)
 	}
@@ -25,32 +25,29 @@ func GetGardenConfig(store pkg.Storage, client pkg.HTTPClient, gardenId string) 
 
 //nolint:unused
 func main() {
-	conf := pkg.LoadConfigFromEnv()
-	h, err := pkg.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaSensorLogURL)
+	conf := mn.LoadConfigFromEnv()
+	h, err := mn.NewHydrangea(conf.HydrangeaGardenURL, conf.HydrangeaRALogURL, conf.HydrangeaRAURL, conf.HydrangeaSensorLogURL)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	client := pkg.Client
+	client := mn.Client
 	gardenConfig, err := GetGardenConfig(h, client, conf.GardenId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	schedule, err := pkg.NewSchedule(gardenConfig)
+	mn.Cache, err = mn.UpdateRACache(mn.Cache, gardenConfig.RAConfigs, client, h)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	schedBytes, err := pkg.EncodeSchedule(schedule)
+	commands, err := mn.CreateRACommands(gardenConfig)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(schedBytes)
+	fmt.Println(commands)
 	// TODO:
-	// Send schedule to gardener
-	// TODO:
-	// Check conditions
-	// Send commands to gardener if needed
+	// Send commands to hydrangea
 }
