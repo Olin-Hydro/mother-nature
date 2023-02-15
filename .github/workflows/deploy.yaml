@@ -23,5 +23,4 @@ jobs:
           function_name: mother-nature
           zip_file: cmd/deployment.zip
           handler: main
-          role: ${{ secrets.AWS_ROLE }}
           runtime: go1.x
