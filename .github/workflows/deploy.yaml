@@ -1,0 +1,27 @@
+name: deploy to lambda
+on: [push]
+jobs:
+  deploy_zip:
+    name: deploy lambda function
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.0"
+      - name: Build binary
+        run: |
+          cd cmd && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o main main.go && zip deployment.zip main
+      - name: deploy to lambda
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: main
+          zip_file: cmd/deployment.zip
+          handler: main
+          role: ${{ secrets.AWS_ROLE }}
+          runtime: go1.x
