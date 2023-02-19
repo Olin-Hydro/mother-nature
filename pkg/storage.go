@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -9,11 +10,11 @@ import (
 )
 
 type Garden struct {
-	Id        string       `json:"id"`
-	Name      string       `json:"name"`
-	Location  string       `json:"location"`
-	Config    GardenConfig `json:"config"`
-	CreatedAt string       `json:"created_at"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Location  string `json:"location"`
+	ConfigID  string `json:"config_id"`
+	CreatedAt string `json:"created_at"`
 }
 
 type GardenConfig struct {
@@ -77,9 +78,11 @@ type SensorLog struct {
 
 type Storage interface {
 	CreateGardenReq(gardenId string) (*http.Request, error)
+	CreateConfigReq(configId string) (*http.Request, error)
 	CreateRALogsReq(RAId string, limit string) (*http.Request, error)
 	CreateRAReq(RAConfigId string) (*http.Request, error)
 	CreateSensorLogsReq(SensorId string, limit string) (*http.Request, error)
+	CreateCommandReq(commands []Command) (*http.Request, error)
 }
 
 type Hydrangea struct {
@@ -87,9 +90,11 @@ type Hydrangea struct {
 	RALogURL     url.URL
 	SensorLogURL url.URL
 	RAURL        url.URL
+	CommandURL   url.URL
+	ConfigURL    url.URL
 }
 
-func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL string) (Hydrangea, error) {
+func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL string, commmandURL string, configURL string) (Hydrangea, error) {
 	h := Hydrangea{}
 	u, err := url.Parse(gardenURL)
 	if err != nil {
@@ -111,6 +116,16 @@ func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL 
 		return h, fmt.Errorf("#NewHydrangea: %e", err)
 	}
 	h.SensorLogURL = *u
+	u, err = url.Parse(commmandURL)
+	if err != nil {
+		return h, fmt.Errorf("#NewHydrangea: %e", err)
+	}
+	h.CommandURL = *u
+	u, err = url.Parse(configURL)
+	if err != nil {
+		return h, fmt.Errorf("#NewHydrangea: %e", err)
+	}
+	h.ConfigURL = *u
 	return h, nil
 }
 
@@ -128,6 +143,15 @@ func (h Hydrangea) CreateGardenReq(gardenId string) (*http.Request, error) {
 	req, err := http.NewRequest("GET", h.GardenURL.String(), strings.NewReader(""))
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)
+	}
+	return req, nil
+}
+
+func (h Hydrangea) CreateConfigReq(configId string) (*http.Request, error) {
+	h.ConfigURL.Path = path.Join(h.ConfigURL.Path, configId)
+	req, err := http.NewRequest("GET", h.ConfigURL.String(), strings.NewReader(""))
+	if err != nil {
+		return nil, fmt.Errorf("#Hydrangea.CreateConfigReq: %e", err)
 	}
 	return req, nil
 }
@@ -152,6 +176,21 @@ func (h Hydrangea) CreateSensorLogsReq(SensorId string, limit string) (*http.Req
 	req, err := http.NewRequest("GET", h.SensorLogURL.String(), strings.NewReader(""))
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateSensorLogsReq: %e", err)
+	}
+	return req, nil
+}
+
+func (h Hydrangea) CreateCommandReq(commands []Command) (*http.Request, error) {
+	values := h.CommandURL.Query()
+	cmdStr, err := json.Marshal(commands)
+	if err != nil {
+		return nil, fmt.Errorf("#Hydrangea.CreateCommandReq: %e", err)
+	}
+	values.Set("commands", string(cmdStr))
+	h.CommandURL.RawQuery = values.Encode()
+	req, err := http.NewRequest("POST", h.CommandURL.String(), strings.NewReader(""))
+	if err != nil {
+		return nil, fmt.Errorf("#Hydrangea.CreateCommandReq: %e", err)
 	}
 	return req, nil
 }

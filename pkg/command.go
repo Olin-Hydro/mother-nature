@@ -13,14 +13,16 @@ const (
 )
 
 type Command struct {
-	CmdType CommandType `json:"cmdType"`
-	Id      string      `json:"id"`
-	Cmd     int         `json:"cmd"`
+	CmdType  CommandType `json:"type"`
+	Id       string      `json:"id"`
+	Cmd      int         `json:"cmd"`
+	GardenId string      `json:"garden_id"`
 }
 
 type RACache struct {
 	SensorLogs map[string]SensorLog
 	RAs        map[string]RA
+	GardenId   string
 }
 
 var (
@@ -31,11 +33,12 @@ func init() {
 	Cache = RACache{}
 }
 
-func newCommand(cmdType CommandType, id string, cmd int) Command {
+func newCommand(cmdType CommandType, id string, cmd int, gardenId string) Command {
 	command := Command{
-		CmdType: cmdType,
-		Id:      id,
-		Cmd:     cmd,
+		CmdType:  cmdType,
+		Id:       id,
+		Cmd:      cmd,
+		GardenId: gardenId,
 	}
 	return command
 }
@@ -54,7 +57,7 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 		if !needed {
 			continue
 		}
-		cmd := newCommand(ReactiveActuator, Cache.RAs[raConfig.RAId].Id, 1)
+		cmd := newCommand(ReactiveActuator, Cache.RAs[raConfig.RAId].Id, 1, Cache.GardenId)
 		cmds = append(cmds, cmd)
 	}
 	if len(errors) != 0 {
@@ -117,7 +120,8 @@ func getSensorLog(sensorId string, store Storage, client HTTPClient) (SensorLog,
 	return sensorLogs.Logs[0], nil
 }
 
-func UpdateRACache(Cache RACache, raConfigs []RAConfig, client HTTPClient, store Storage) (RACache, error) {
+func UpdateRACache(Cache RACache, raConfigs []RAConfig, gardenId string, client HTTPClient, store Storage) (RACache, error) {
+	Cache.GardenId = gardenId
 	for i := 0; i < len(raConfigs); i++ {
 		raConfigId := raConfigs[i].RAId
 		ra, err := getRa(raConfigId, store, client)

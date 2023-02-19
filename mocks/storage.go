@@ -8,6 +8,7 @@ import (
 	http "net/http"
 	reflect "reflect"
 
+	pkg "github.com/Olin-Hydro/mother-nature/pkg"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -32,6 +33,36 @@ func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 	return m.recorder
+}
+
+// CreateCommandReq mocks base method.
+func (m *MockStorage) CreateCommandReq(commands []pkg.Command) (*http.Request, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCommandReq", commands)
+	ret0, _ := ret[0].(*http.Request)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCommandReq indicates an expected call of CreateCommandReq.
+func (mr *MockStorageMockRecorder) CreateCommandReq(commands interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommandReq", reflect.TypeOf((*MockStorage)(nil).CreateCommandReq), commands)
+}
+
+// CreateConfigReq mocks base method.
+func (m *MockStorage) CreateConfigReq(configId string) (*http.Request, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateConfigReq", configId)
+	ret0, _ := ret[0].(*http.Request)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateConfigReq indicates an expected call of CreateConfigReq.
+func (mr *MockStorageMockRecorder) CreateConfigReq(configId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConfigReq", reflect.TypeOf((*MockStorage)(nil).CreateConfigReq), configId)
 }
 
 // CreateGardenReq mocks base method.

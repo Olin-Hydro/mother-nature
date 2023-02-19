@@ -11,6 +11,8 @@ type Config struct {
 	HydrangeaRALogURL     string
 	HydrangeaSensorLogURL string
 	HydrangeaRAURL        string
+	HydrangeaCommandURL   string
+	HydrangeaConfigURL    string
 	GardenId              string
 }
 
@@ -20,6 +22,8 @@ func LoadConfigFromEnv() Config {
 		HydrangeaRALogURL:     os.Getenv("HYDRANGEA_RALOG_URL"),
 		HydrangeaSensorLogURL: os.Getenv("HYDRANGEA_SENSORLOG_URL"),
 		HydrangeaRAURL:        os.Getenv("HYDRANGEA_RA_URL"),
+		HydrangeaCommandURL:   os.Getenv("HYDRANGEA_COMMAND_URL"),
+		HydrangeaConfigURL:    os.Getenv("HYDRANGEA_CONFIG_URL"),
 		GardenId:              os.Getenv("GARDEN_ID"),
 	}
 }
