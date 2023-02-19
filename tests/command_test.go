@@ -13,13 +13,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func MockCommands() []pkg.Command {
+	cmds := []pkg.Command{
+		{
+			CmdType:  pkg.ReactiveActuator,
+			Id:       "abc",
+			Cmd:      1,
+			GardenId: "bcd",
+		},
+		{
+			CmdType:  pkg.ScheduledActuator,
+			Id:       "aab",
+			Cmd:      0,
+			GardenId: "bcd",
+		},
+	}
+	return cmds
+}
+
 func TestCreateRACommands(t *testing.T) {
 	pkg.Cache = mockRaCache()
 	cmds, err := pkg.CreateRACommands(mockGardenConfig())
 	expectedCmd := pkg.Command{
-		CmdType: pkg.ReactiveActuator,
-		Id:      raId,
-		Cmd:     1,
+		CmdType:  pkg.ReactiveActuator,
+		Id:       raId,
+		Cmd:      1,
+		GardenId: gardenId,
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, len(cmds), 1)
@@ -52,7 +71,7 @@ func TestUpdateRACache(t *testing.T) {
 	}
 	mockStorage.EXPECT().CreateSensorLogsReq(sensorId, "1").Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res2, nil)
-	cache, err := pkg.UpdateRACache(pkg.Cache, raConfigs, mockClient, mockStorage)
+	cache, err := pkg.UpdateRACache(pkg.Cache, raConfigs, mockRaCache().GardenId, mockClient, mockStorage)
 	assert.NoError(t, err)
 	assert.Equal(t, cache, mockRaCache())
 }

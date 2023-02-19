@@ -8,15 +8,17 @@ import (
 )
 
 const (
-	BaseURL     = "https://test.com"
-	GardenRoute = "/garden"
-	RaLogRoute  = "/ra/logging/actions"
-	RaRoute     = "/ra"
-	SensorRoute = "/sensor"
+	BaseURL      = "https://test.com"
+	GardenRoute  = "/garden"
+	RaLogRoute   = "/ra/logging/actions"
+	RaRoute      = "/ra"
+	CommandRoute = "/cmd"
+	SensorRoute  = "/sensor"
+	ConfigRoute  = "/config"
 )
 
 func MockHydrangea() (pkg.Hydrangea, error) {
-	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaLogRoute, BaseURL+RaRoute, BaseURL+SensorRoute)
+	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaLogRoute, BaseURL+RaRoute, BaseURL+SensorRoute, BaseURL+CommandRoute, BaseURL+ConfigRoute)
 }
 
 func TestNewHydrangea(t *testing.T) {
@@ -26,6 +28,7 @@ func TestNewHydrangea(t *testing.T) {
 	assert.Equal(t, RaLogRoute, h.RALogURL.Path)
 	assert.Equal(t, RaRoute, h.RAURL.Path)
 	assert.Equal(t, SensorRoute, h.SensorLogURL.Path)
+	assert.Equal(t, ConfigRoute, h.ConfigURL.Path)
 }
 
 func TestCreateGardenReq(t *testing.T) {
@@ -35,6 +38,15 @@ func TestCreateGardenReq(t *testing.T) {
 	req, err := h.CreateGardenReq(id)
 	assert.NoError(t, err)
 	assert.Equal(t, BaseURL+GardenRoute+"/"+id, req.URL.String())
+}
+
+func TestCreateConfigReq(t *testing.T) {
+	h, err := MockHydrangea()
+	assert.NoError(t, err)
+	id := "abc"
+	req, err := h.CreateConfigReq(id)
+	assert.NoError(t, err)
+	assert.Equal(t, BaseURL+ConfigRoute+"/"+id, req.URL.String())
 }
 
 func TestCreateRALogsReq(t *testing.T) {
@@ -64,4 +76,11 @@ func TestCreateSensorLogsReq(t *testing.T) {
 	req, err := h.CreateSensorLogsReq(id, limit)
 	assert.NoError(t, err)
 	assert.Equal(t, BaseURL+SensorRoute+"/"+id+"?limit="+limit, req.URL.String())
+}
+
+func TestCreateCommandReq(t *testing.T) {
+	h, err := MockHydrangea()
+	assert.NoError(t, err)
+	_, err = h.CreateCommandReq(MockCommands())
+	assert.NoError(t, err)
 }
