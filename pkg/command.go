@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"time"
 )
 
 type CommandType int
@@ -20,9 +21,10 @@ type Command struct {
 }
 
 type RACache struct {
-	SensorLogs map[string]SensorLog
-	RAs        map[string]RA
-	GardenId   string
+	ActuationTimes map[string]time.Time
+	SensorLogs     map[string]SensorLog
+	RAs            map[string]RA
+	GardenId       string
 }
 
 var (
@@ -41,6 +43,15 @@ func newCommand(cmdType CommandType, id string, cmd int, gardenId string) Comman
 		GardenId: gardenId,
 	}
 	return command
+}
+
+func StrToTime(dtStr string) (time.Time, error) {
+	layout := "2006-01-02T15:04:05.000Z"
+	dt, err := time.Parse(layout, dtStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("#StrToTime: %e", err)
+	}
+	return dt, nil
 }
 
 func CreateRACommands(conf GardenConfig) ([]Command, error) {
@@ -66,7 +77,22 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 	return cmds, nil
 }
 
+func isPassedInterval(raConfig RAConfig) (bool, error) {
+	actTime, ok := Cache.ActuationTimes[raConfig.RAId]
+	if !ok {
+		return false, fmt.Errorf("#isPassedInterval: RAId %s not found in RACache", raConfig.RAId)
+	}
+	timeDiff := time.Now().UTC().Sub(actTime).Seconds()
+	return timeDiff <= raConfig.Interval, nil
+}
+
 func raCommandNeeded(raConfig RAConfig) (bool, error) {
+	passed, err := isPassedInterval(raConfig)
+	if err != nil {
+		return false, fmt.Errorf("#raCommandNeeded: %d", raConfig.ThresholdType)
+	} else if passed {
+		return false, nil
+	}
 	switch raConfig.ThresholdType {
 	case 0:
 		if raConfig.Threshold < Cache.SensorLogs[raConfig.RAId].Value {
@@ -120,20 +146,51 @@ func getSensorLog(sensorId string, store Storage, client HTTPClient) (SensorLog,
 	return sensorLogs.Logs[0], nil
 }
 
+func getRaLogs(raId string, store Storage, client HTTPClient) (RALog, error) {
+	raLog := RALog{}
+	raLogs := RALogs{}
+	req, err := store.CreateRALogsReq(raId, "1")
+	if err != nil {
+		return raLog, fmt.Errorf("#getRaLogs: %e", err)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return raLog, fmt.Errorf("#getRaLogs: %e", err)
+	}
+	err = DecodeJson(&raLogs, res.Body)
+	if err != nil {
+		return raLog, fmt.Errorf("getRaLogs: %e", err)
+	}
+	if len(raLogs.Logs) != 1 {
+		// TODO: make this a log warning, and allow it to continue
+		return raLog, fmt.Errorf("#getRaLog: storage returned wrong number of logs: expected 1 got %d", len(raLogs.Logs))
+	}
+	return raLogs.Logs[0], nil
+}
+
 func UpdateRACache(Cache RACache, raConfigs []RAConfig, gardenId string, client HTTPClient, store Storage) (RACache, error) {
 	Cache.GardenId = gardenId
 	for i := 0; i < len(raConfigs); i++ {
-		raConfigId := raConfigs[i].RAId
-		ra, err := getRa(raConfigId, store, client)
+		raId := raConfigs[i].RAId
+		ra, err := getRa(raId, store, client)
 		if err != nil {
 			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
 		}
-		Cache.RAs[raConfigId] = ra
+		Cache.RAs[raId] = ra
 		sensorLog, err := getSensorLog(ra.SensorId, store, client)
 		if err != nil {
 			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
 		}
-		Cache.SensorLogs[raConfigId] = sensorLog
+		Cache.SensorLogs[raId] = sensorLog
+		raLog, err := getRaLogs(Cache.RAs[raId].Id, store, client)
+		if err != nil {
+			return Cache, fmt.Errorf("#UpdateRACache: %e", err)
+		}
+		actTime, err := StrToTime(raLog.CreatedAt)
+		if err != nil {
+			return Cache, fmt.Errorf("UpdateRACache: %e", err)
+		}
+		Cache.ActuationTimes[raId] = actTime
 	}
 	return Cache, nil
 }
