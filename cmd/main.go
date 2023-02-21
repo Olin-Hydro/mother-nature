@@ -2,6 +2,7 @@ package mn
 
 import (
 	"fmt"
+	"net/http"
 
 	mn "github.com/Olin-Hydro/mother-nature/pkg"
 	_ "github.com/joho/godotenv/autoload"
@@ -26,7 +27,6 @@ func GetGardenConfig(store mn.Storage, client mn.HTTPClient, gardenId string) (m
 	if err != nil {
 		return config, fmt.Errorf("#getConfig: %e", err)
 	}
-	fmt.Println(req2.URL)
 	res2, err := client.Do(req2)
 	if err != nil {
 		return config, fmt.Errorf("#getConfig: %e", err)
@@ -36,6 +36,21 @@ func GetGardenConfig(store mn.Storage, client mn.HTTPClient, gardenId string) (m
 		return config, fmt.Errorf("#getConfig: %e", err)
 	}
 	return config, nil
+}
+
+func SendCommands(store mn.Storage, client mn.HTTPClient, commands []mn.Command) error {
+	req, err := store.CreateCommandReq(commands)
+	if err != nil {
+		return fmt.Errorf("#SendCommands: %e", err)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("#SendCommands: %e", err)
+	}
+	if res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("#SendCommands: Error sending commands to hydrangea: %v", res)
+	}
+	return nil
 }
 
 //nolint:unused
@@ -69,7 +84,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(commands)
-	// TODO:
-	// Send commands to hydrangea
+	if len(commands) > 0 {
+		SendCommands(h, client, commands)
+		// TODO: Log commands here
+	}
 }

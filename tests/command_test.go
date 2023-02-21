@@ -61,7 +61,6 @@ func TestUpdateRACache(t *testing.T) {
 	}
 	mockStorage.EXPECT().CreateRAReq(raConfigs[0].RAId).Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
-
 	b2, err := json.Marshal(mockSensorLogs())
 	assert.NoError(t, err)
 	r2 := io.NopCloser(bytes.NewReader(b2))
@@ -71,7 +70,16 @@ func TestUpdateRACache(t *testing.T) {
 	}
 	mockStorage.EXPECT().CreateSensorLogsReq(sensorId, "1").Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res2, nil)
+	mockStorage.EXPECT().CreateRALogsReq(raId, "1").Return(&http.Request{}, nil)
+	b3, err := json.Marshal(mockRaLogs())
+	assert.NoError(t, err)
+	r3 := io.NopCloser(bytes.NewReader(b3))
+	res3 := http.Response{
+		StatusCode: 200,
+		Body:       r3,
+	}
+	mockClient.EXPECT().Do(&http.Request{}).Return(&res3, nil)
 	cache, err := pkg.UpdateRACache(pkg.Cache, raConfigs, mockRaCache().GardenId, mockClient, mockStorage)
 	assert.NoError(t, err)
-	assert.Equal(t, cache, mockRaCache())
+	assert.Equal(t, mockRaCache(), cache)
 }
