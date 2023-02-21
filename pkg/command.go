@@ -77,16 +77,20 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 	return cmds, nil
 }
 
-func isPassedInterval(raConfig RAConfig) bool {
-	timeDiff := time.Now().UTC().Sub(Cache.ActuationTimes[raConfig.RAId]).Seconds()
-	if timeDiff <= raConfig.Interval {
-		return false
+func isPassedInterval(raConfig RAConfig) (bool, error) {
+	actTime, ok := Cache.ActuationTimes[raConfig.RAId]
+	if !ok {
+		return false, fmt.Errorf("#isPassedInterval: RAId %s not found in RACache", raConfig.RAId)
 	}
-	return true
+	timeDiff := time.Now().UTC().Sub(actTime).Seconds()
+	return timeDiff <= raConfig.Interval, nil
 }
 
 func raCommandNeeded(raConfig RAConfig) (bool, error) {
-	if !isPassedInterval(raConfig) {
+	passed, err := isPassedInterval(raConfig)
+	if err != nil {
+		return false, fmt.Errorf("#raCommandNeeded: %d", raConfig.ThresholdType)
+	} else if passed {
 		return false, nil
 	}
 	switch raConfig.ThresholdType {
