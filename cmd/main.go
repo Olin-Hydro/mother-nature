@@ -84,8 +84,11 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	// TODO: Log commands here
 	if len(commands) > 0 {
-		SendCommands(h, client, commands)
-		// TODO: Log commands here
+		err := SendCommands(h, client, commands)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
