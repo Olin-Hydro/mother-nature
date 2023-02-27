@@ -32,7 +32,11 @@ var (
 )
 
 func init() {
-	Cache = RACache{}
+	Cache = RACache{
+		ActuationTimes: make(map[string]time.Time),
+		SensorLogs:     make(map[string]SensorLog),
+		RAs:            make(map[string]RA),
+	}
 }
 
 func newCommand(cmdType CommandType, id string, cmd int, gardenId string) Command {

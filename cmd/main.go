@@ -1,4 +1,4 @@
-package mn
+package main
 
 import (
 	"fmt"
@@ -53,7 +53,6 @@ func SendCommands(store mn.Storage, client mn.HTTPClient, commands []mn.Command)
 	return nil
 }
 
-//nolint:unused
 func main() {
 	conf := mn.LoadConfigFromEnv()
 	h, err := mn.NewHydrangea(
@@ -85,6 +84,7 @@ func main() {
 		return
 	}
 	// TODO: Log commands here
+	fmt.Println(commands)
 	if len(commands) > 0 {
 		err := SendCommands(h, client, commands)
 		if err != nil {

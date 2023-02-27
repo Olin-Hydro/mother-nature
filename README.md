@@ -6,11 +6,13 @@ Install some dependencies:
 - mockgen: https://github.com/golang/mock
 
 To generate mocks using mockgen (storage example):
+
 ```
 mockgen -source pkg/storage.go -destination mocks/storage.go -package mocks
 ```
 
 Before pushing run some checks:
+
 ```
 go build cmd/main.go
 go vet cmd/
@@ -18,6 +20,7 @@ golangci-lint run
 ```
 
 To run the test suite:
+
 ```
-go test github.com/Olin-Hydro/mother-nature/tests
+go test pkg/tests/* -v
 ```
