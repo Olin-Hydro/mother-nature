@@ -1,8 +1,9 @@
-package tests
+package pkg
 
 import (
 	"testing"
 
+	"github.com/Olin-Hydro/mother-nature/mocks"
 	"github.com/Olin-Hydro/mother-nature/pkg"
 	"github.com/stretchr/testify/assert"
 )
@@ -81,6 +82,6 @@ func TestCreateSensorLogsReq(t *testing.T) {
 func TestCreateCommandReq(t *testing.T) {
 	h, err := MockHydrangea()
 	assert.NoError(t, err)
-	_, err = h.CreateCommandReq(MockCommands())
+	_, err = h.CreateCommandReq(mocks.MockCommands())
 	assert.NoError(t, err)
 }

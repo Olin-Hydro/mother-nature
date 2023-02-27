@@ -10,7 +10,7 @@ import (
 )
 
 type Garden struct {
-	Id        string `json:"id"`
+	Id        string `json:"_id"`
 	Name      string `json:"name"`
 	Location  string `json:"location"`
 	ConfigID  string `json:"config_id"`
@@ -18,27 +18,27 @@ type Garden struct {
 }
 
 type GardenConfig struct {
-	Id        string         `json:"id"`
+	Id        string         `json:"_id"`
 	Name      string         `json:"name"`
 	Sensors   []SensorConfig `json:"sensors"`
-	SAConfigs []SAConfig     `json:"scheduled_actuators"`
-	RAConfigs []RAConfig     `json:"reactive_actuators"`
+	SAConfigs []SAConfig     `json:"sa_schedule"`
+	RAConfigs []RAConfig     `json:"ra_schedule"`
 	CreatedAt string         `json:"created_at"`
 }
 
 type SensorConfig struct {
-	Id       string  `json:"id"`
+	Id       string  `json:"_id"`
 	Interval float64 `json:"interval"`
 }
 
 type SAConfig struct {
-	SAId string   `json:"id"`
+	SAId string   `json:"sa_id"`
 	On   []string `json:"on"`
 	Off  []string `json:"off"`
 }
 
 type RAConfig struct {
-	RAId          string  `json:"id"`
+	RAId          string  `json:"ra_id"`
 	Interval      float64 `json:"interval"`
 	Threshold     float64 `json:"threshold"`
 	Duration      float64 `json:"duration"`
@@ -50,14 +50,14 @@ type RALogs struct {
 }
 
 type RA struct {
-	Id        string `json:"id"`
+	Id        string `json:"_id"`
 	Name      string `json:"name"`
 	SensorId  string `json:"sensor_id"`
 	CreatedAt string `json:"created_at"`
 }
 
 type RALog struct {
-	Id         string `json:"id"`
+	Id         string `json:"_id"`
 	Name       string `json:"name"`
 	ActuatorId string `json:"actuator_id"`
 	Data       string `json:"data"`
@@ -69,7 +69,7 @@ type SensorLogs struct {
 }
 
 type SensorLog struct {
-	Id        string  `json:"id"`
+	Id        string  `json:"_id"`
 	Name      string  `json:"name"`
 	SensorId  string  `json:"sensor_id"`
 	Value     float64 `json:"value"`
