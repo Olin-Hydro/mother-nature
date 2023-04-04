@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -70,7 +71,6 @@ type SensorLogs struct {
 
 type SensorLog struct {
 	Id        string  `json:"_id"`
-	Name      string  `json:"name"`
 	SensorId  string  `json:"sensor_id"`
 	Value     float64 `json:"value"`
 	CreatedAt string  `json:"created_at"`
@@ -92,9 +92,10 @@ type Hydrangea struct {
 	RAURL        url.URL
 	CommandURL   url.URL
 	ConfigURL    url.URL
+	ApiKey       string
 }
 
-func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL string, commmandURL string, configURL string) (Hydrangea, error) {
+func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL string, commmandURL string, configURL string, apiKey string) (Hydrangea, error) {
 	h := Hydrangea{}
 	u, err := url.Parse(gardenURL)
 	if err != nil {
@@ -126,12 +127,14 @@ func NewHydrangea(gardenURL string, raLogURL string, raURL string, sensorLogURL 
 		return h, fmt.Errorf("#NewHydrangea: %e", err)
 	}
 	h.ConfigURL = *u
+	h.ApiKey = apiKey
 	return h, nil
 }
 
 func (h Hydrangea) CreateRAReq(RAConfigId string) (*http.Request, error) {
 	h.RAURL.Path = path.Join(h.RAURL.Path, RAConfigId)
 	req, err := http.NewRequest("GET", h.RAURL.String(), strings.NewReader(""))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)
 	}
@@ -141,6 +144,7 @@ func (h Hydrangea) CreateRAReq(RAConfigId string) (*http.Request, error) {
 func (h Hydrangea) CreateGardenReq(gardenId string) (*http.Request, error) {
 	h.GardenURL.Path = path.Join(h.GardenURL.Path, gardenId)
 	req, err := http.NewRequest("GET", h.GardenURL.String(), strings.NewReader(""))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateGardenReq: %e", err)
 	}
@@ -150,6 +154,7 @@ func (h Hydrangea) CreateGardenReq(gardenId string) (*http.Request, error) {
 func (h Hydrangea) CreateConfigReq(configId string) (*http.Request, error) {
 	h.ConfigURL.Path = path.Join(h.ConfigURL.Path, configId)
 	req, err := http.NewRequest("GET", h.ConfigURL.String(), strings.NewReader(""))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateConfigReq: %e", err)
 	}
@@ -162,6 +167,7 @@ func (h Hydrangea) CreateRALogsReq(RAId string, limit string) (*http.Request, er
 	values.Set("limit", limit)
 	h.RALogURL.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", h.RALogURL.String(), strings.NewReader(""))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateRALogsReq: %e", err)
 	}
@@ -174,6 +180,7 @@ func (h Hydrangea) CreateSensorLogsReq(SensorId string, limit string) (*http.Req
 	values.Set("limit", limit)
 	h.SensorLogURL.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", h.SensorLogURL.String(), strings.NewReader(""))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateSensorLogsReq: %e", err)
 	}
@@ -186,9 +193,9 @@ func (h Hydrangea) CreateCommandReq(commands []Command) (*http.Request, error) {
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateCommandReq: %e", err)
 	}
-	values.Set("commands", string(cmdStr))
 	h.CommandURL.RawQuery = values.Encode()
-	req, err := http.NewRequest("POST", h.CommandURL.String(), strings.NewReader(""))
+	req, err := http.NewRequest("POST", h.CommandURL.String(), bytes.NewBuffer(cmdStr))
+	req.Header.Add("x-api-key", h.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("#Hydrangea.CreateCommandReq: %e", err)
 	}

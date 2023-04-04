@@ -2,22 +2,23 @@ package pkg
 
 import (
 	"fmt"
+	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-type CommandType int
-
 const (
-	Sensor CommandType = iota
-	ScheduledActuator
-	ReactiveActuator
+	Sensor            string = "Sensor"
+	ScheduledActuator string = "Scheduled Actuator"
+	ReactiveActuator  string = "Reactive Actuator"
 )
 
 type Command struct {
-	CmdType  CommandType `json:"type"`
-	Id       string      `json:"id"`
-	Cmd      int         `json:"cmd"`
-	GardenId string      `json:"garden_id"`
+	RefId    string `json:"ref_id"`
+	CmdType  string `json:"type"`
+	Cmd      int    `json:"cmd"`
+	GardenId string `json:"garden_id"`
 }
 
 type RACache struct {
@@ -39,10 +40,10 @@ func init() {
 	}
 }
 
-func newCommand(cmdType CommandType, id string, cmd int, gardenId string) Command {
+func newCommand(cmdType string, id string, cmd int, gardenId string) Command {
 	command := Command{
+		RefId:    id,
 		CmdType:  cmdType,
-		Id:       id,
 		Cmd:      cmd,
 		GardenId: gardenId,
 	}
@@ -50,8 +51,7 @@ func newCommand(cmdType CommandType, id string, cmd int, gardenId string) Comman
 }
 
 func StrToTime(dtStr string) (time.Time, error) {
-	layout := "2006-01-02T15:04:05.000Z"
-	dt, err := time.Parse(layout, dtStr)
+	dt, err := time.Parse(time.RFC3339Nano, dtStr)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("#StrToTime: %e", err)
 	}
@@ -63,6 +63,7 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 	var cmds []Command
 	var errors []error
 	for i := 0; i < len(raConfigs); i++ {
+		log.Info(fmt.Sprintf("Checking RA %s with ID %s", Cache.RAs[raConfigs[i].RAId].Name, raConfigs[i].RAId))
 		raConfig := raConfigs[i]
 		needed, err := raCommandNeeded(raConfig)
 		if err != nil {
@@ -72,6 +73,7 @@ func CreateRACommands(conf GardenConfig) ([]Command, error) {
 		if !needed {
 			continue
 		}
+		log.Info(fmt.Sprintf("Creating command for %s with type %s and value %d", Cache.RAs[raConfig.RAId].Name, ReactiveActuator, 1))
 		cmd := newCommand(ReactiveActuator, Cache.RAs[raConfig.RAId].Id, 1, Cache.GardenId)
 		cmds = append(cmds, cmd)
 	}
@@ -87,6 +89,7 @@ func isPassedInterval(raConfig RAConfig) (bool, error) {
 		return false, fmt.Errorf("#isPassedInterval: RAId %s not found in RACache", raConfig.RAId)
 	}
 	timeDiff := time.Now().UTC().Sub(actTime).Seconds()
+	log.Info(fmt.Sprintf("Comparing time since actuation of %f seconds and %f seconds interval", timeDiff, raConfig.Interval))
 	return timeDiff <= raConfig.Interval, nil
 }
 
@@ -100,10 +103,12 @@ func raCommandNeeded(raConfig RAConfig) (bool, error) {
 	switch raConfig.ThresholdType {
 	case 0:
 		if raConfig.Threshold < Cache.SensorLogs[raConfig.RAId].Value {
+			log.Info(fmt.Sprintf("Threshold: %f is smaller than sensor value %f", raConfig.Threshold, Cache.SensorLogs[raConfig.RAId].Value))
 			return true, nil
 		}
 	case 1:
 		if raConfig.Threshold > Cache.SensorLogs[raConfig.RAId].Value {
+			log.Info(fmt.Sprintf("Threshold: %f is greater than sensor value %f", raConfig.Threshold, Cache.SensorLogs[raConfig.RAId].Value))
 			return true, nil
 		}
 	default:
@@ -140,7 +145,10 @@ func getSensorLog(sensorId string, store Storage, client HTTPClient) (SensorLog,
 	if err != nil {
 		return sensorLog, fmt.Errorf("#getSensorLog: %e", err)
 	}
-	err = DecodeJson(&sensorLogs, res.Body)
+	if res.StatusCode != http.StatusOK {
+		return sensorLog, fmt.Errorf("#getSensorLog: %s", res.Status)
+	}
+	err = DecodeJson(&sensorLogs.Logs, res.Body)
 	if err != nil {
 		return sensorLog, fmt.Errorf("#getSensorLog: %e", err)
 	}
@@ -161,12 +169,11 @@ func getRaLogs(raId string, store Storage, client HTTPClient) (RALog, error) {
 	if err != nil {
 		return raLog, fmt.Errorf("#getRaLogs: %e", err)
 	}
-	err = DecodeJson(&raLogs, res.Body)
+	err = DecodeJson(&raLogs.Logs, res.Body)
 	if err != nil {
 		return raLog, fmt.Errorf("getRaLogs: %e", err)
 	}
 	if len(raLogs.Logs) != 1 {
-		// TODO: make this a log warning, and allow it to continue
 		return raLog, fmt.Errorf("#getRaLog: storage returned wrong number of logs: expected 1 got %d", len(raLogs.Logs))
 	}
 	return raLogs.Logs[0], nil
