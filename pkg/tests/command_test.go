@@ -17,8 +17,8 @@ func TestCreateRACommands(t *testing.T) {
 	pkg.Cache = mocks.MockRaCache()
 	cmds, err := pkg.CreateRACommands(mocks.MockGardenConfig())
 	expectedCmd := pkg.Command{
+		RefId:    mocks.RAId,
 		CmdType:  pkg.ReactiveActuator,
-		Id:       mocks.RAId,
 		Cmd:      1,
 		GardenId: mocks.GardenId,
 	}
@@ -43,7 +43,7 @@ func TestUpdateRACache(t *testing.T) {
 	}
 	mockStorage.EXPECT().CreateRAReq(raConfigs[0].RAId).Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res, nil)
-	b2, err := json.Marshal(mocks.MockSensorLogs())
+	b2, err := json.Marshal(mocks.MockSensorLogs().Logs)
 	assert.NoError(t, err)
 	r2 := io.NopCloser(bytes.NewReader(b2))
 	res2 := http.Response{
@@ -53,7 +53,7 @@ func TestUpdateRACache(t *testing.T) {
 	mockStorage.EXPECT().CreateSensorLogsReq(mocks.SensorId, "1").Return(&http.Request{}, nil)
 	mockClient.EXPECT().Do(&http.Request{}).Return(&res2, nil)
 	mockStorage.EXPECT().CreateRALogsReq(mocks.RAId, "1").Return(&http.Request{}, nil)
-	b3, err := json.Marshal(mocks.MockRaLogs())
+	b3, err := json.Marshal(mocks.MockRaLogs().Logs)
 	assert.NoError(t, err)
 	r3 := io.NopCloser(bytes.NewReader(b3))
 	res3 := http.Response{

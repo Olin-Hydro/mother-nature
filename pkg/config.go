@@ -14,6 +14,7 @@ type Config struct {
 	HydrangeaCommandURL   string
 	HydrangeaConfigURL    string
 	GardenId              string
+	ApiKey                string
 }
 
 func LoadConfigFromEnv() Config {
@@ -25,5 +26,6 @@ func LoadConfigFromEnv() Config {
 		HydrangeaCommandURL:   os.Getenv("HYDRANGEA_COMMAND_URL"),
 		HydrangeaConfigURL:    os.Getenv("HYDRANGEA_CONFIG_URL"),
 		GardenId:              os.Getenv("GARDEN_ID"),
+		ApiKey:                os.Getenv("API_KEY"),
 	}
 }

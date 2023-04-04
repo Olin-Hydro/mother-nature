@@ -16,10 +16,11 @@ const (
 	CommandRoute = "/cmd"
 	SensorRoute  = "/sensor"
 	ConfigRoute  = "/config"
+	ApiKey       = "key"
 )
 
 func MockHydrangea() (pkg.Hydrangea, error) {
-	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaLogRoute, BaseURL+RaRoute, BaseURL+SensorRoute, BaseURL+CommandRoute, BaseURL+ConfigRoute)
+	return pkg.NewHydrangea(BaseURL+GardenRoute, BaseURL+RaLogRoute, BaseURL+RaRoute, BaseURL+SensorRoute, BaseURL+CommandRoute, BaseURL+ConfigRoute, ApiKey)
 }
 
 func TestNewHydrangea(t *testing.T) {

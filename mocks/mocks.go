@@ -20,13 +20,13 @@ func MockCommands() []pkg.Command {
 	cmds := []pkg.Command{
 		{
 			CmdType:  pkg.ReactiveActuator,
-			Id:       "abc",
+			RefId:    "abc",
 			Cmd:      1,
 			GardenId: "bcd",
 		},
 		{
 			CmdType:  pkg.ScheduledActuator,
-			Id:       "aab",
+			RefId:    "aab",
 			Cmd:      0,
 			GardenId: "bcd",
 		},
@@ -40,7 +40,6 @@ func MockRaCache() pkg.RACache {
 		SensorLogs: map[string]pkg.SensorLog{
 			RAId: {
 				Id:        "abc",
-				Name:      "sensor_name",
 				SensorId:  SensorId,
 				Value:     sensorValue,
 				CreatedAt: "1970-01-01T00:00:00.000Z",
@@ -75,7 +74,6 @@ func MockSensorLogs() pkg.SensorLogs {
 		Logs: []pkg.SensorLog{
 			{
 				Id:        "abc",
-				Name:      "sensor_name",
 				SensorId:  SensorId,
 				Value:     sensorValue,
 				CreatedAt: "1970-01-01T00:00:00.000Z",
