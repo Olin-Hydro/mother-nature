@@ -110,6 +110,7 @@ func main() {
 		if err != nil {
 			log.Error(err)
 		}
+		log.Info("Sent Commands")
 	} else {
 		log.Info("No commands to send")
 	}
