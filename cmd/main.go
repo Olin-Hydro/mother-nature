@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 
 	mn "github.com/Olin-Hydro/mother-nature/pkg"
+	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
 )
@@ -73,6 +75,10 @@ func init() {
 }
 
 func main() {
+	lambda.Start(handler)
+}
+
+func handler(ctx context.Context) {
 	conf := mn.LoadConfigFromEnv()
 	h, err := mn.NewHydrangea(
 		conf.HydrangeaGardenURL,
