@@ -169,6 +169,13 @@ func getRaLogs(raId string, store Storage, client HTTPClient) (RALog, error) {
 	if err != nil {
 		return raLog, fmt.Errorf("#getRaLogs: %e", err)
 	}
+	// No logs found, default time to be a long time ago
+	if res.StatusCode == http.StatusNotFound {
+		raLog.Id = raId
+		raLog.CreatedAt = "2000-03-02T16:13:07.437575+00:00"
+		log.Warn(fmt.Sprintf("No logs found for ra with id %s, allowing command", raId))
+		return raLog, nil
+	}
 	err = DecodeJson(&raLogs.Logs, res.Body)
 	if err != nil {
 		return raLog, fmt.Errorf("getRaLogs: %e", err)
